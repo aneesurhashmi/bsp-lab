@@ -53,57 +53,60 @@ clc;
 
 
 % ============== Activity 2 ========== %
-% load ecg.dat;
+load ecg.dat;
 
+fs = 200;
+n = 8;
+wp = 58*2/fs;
+wn = 62*2/fs;
 
-% fs = 400;
-% n = 8;
-% wp = 58*2/fs;
-% wn = 62*2/fs;
-
-% [b,a] = butter(n, [wp, wn],'stop'); % notch filter for 60Hz noise
-% [H, f1] = freqz(b,a,512, fs);
-% H = 20*log10(abs(H));
-% figure(1);
-% plot(f1,H, "k");
-% ylim([-80 0]);
-% ylabel("dB")
-% xlabel("Frequency")
-% title("Butterworth Notch filter response");
-
-% ecg_freq = abs(fft(ecg));
-% ecg_filtered = filter(b,a,(ecg_freq));
-
-% figure(2);
-% subplot(211);
-% plot(1:length(ecg_filtered), ecg_freq);
-% xlabel("Frequency")
-% title("ECG frequency response");
-% subplot(212);
-% plot(1:length(ecg_filtered), ecg_filtered);
-% xlabel("Frequency")
-% title("Filtered ECG frequency response");
-
-% ========== Post Lab tasks ========== 
-fs = 2000;
-n = 8; % order of filter
-wn = 200*2/fs; % normalized cutoff freq (200)
-rp = 3; % passband ripples
-rs = 60; % stopband ripples
-
-[b,a] = ellip(n,rp, rs,wn);
-[H, f4] = freqz(b,a,512, fs);
+[b,a] = butter(n, [wp, wn],'stop'); % notch filter for 60Hz noise
+[H, f1] = freqz(b,a,512, fs);
 H = 20*log10(abs(H));
 figure(1);
-subplot(211);
-plot(f4, H,"k");
-title("Elliptic filter response");
-ylim([-80 0]);
-
-[b, a] = butter(n,wn, "low"); % 2nd stage IIR filter: Since we know n, wn
-[H, f1] = freqz(b, a, 512, fs); % freq response of filter, 
-H = 20*log10(abs(H)); % plot freq response ROR
-subplot(212);
 plot(f1,H, "k");
 ylim([-80 0]);
-title("Butterworth filter response");
+ylabel("dB")
+xlabel("Frequency")
+title("Butterworth Notch filter response");
+
+ecg_freq = abs(fft(ecg));
+ecg_PSD = ecg_freq.^2;
+ecg_filtered = filter(b,a,ecg);
+ecg_filtered_PSD = abs(fft(ecg_filtered)).^2;
+
+freq_scale = [1:length(ecg_filtered)]*200./length(ecg_filtered);
+
+figure(2);
+subplot(211);
+plot(freq_scale, ecg_PSD);
+xlabel("Frequency")
+title("ECG frequency response");
+subplot(212);
+plot(freq_scale, ecg_filtered_PSD);
+xlabel("Frequency")
+title("Filtered ECG frequency response");
+
+% ========== Post Lab tasks ========== 
+% fs = 2000;
+% n = 8; % order of filter
+% wn = 200*2/fs; % normalized cutoff freq (200)
+% rp = 3; % passband ripples
+% rs = 60; % stopband ripples
+
+% [b,a] = ellip(n,rp, rs,wn);
+% [H, f4] = freqz(b,a,512, fs);
+% H = 20*log10(abs(H));
+% figure(1);
+% subplot(211);
+% plot(f4, H,"k");
+% title("Elliptic filter response");
+% ylim([-80 0]);
+
+% [b, a] = butter(n,wn, "low"); % 2nd stage IIR filter: Since we know n, wn
+% [H, f1] = freqz(b, a, 512, fs); % freq response of filter, 
+% H = 20*log10(abs(H)); % plot freq response ROR
+% subplot(212);
+% plot(f1,H, "k");
+% ylim([-80 0]);
+% title("Butterworth filter response");
